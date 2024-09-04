@@ -11,91 +11,101 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
+//CAboutDlg默认构造函数
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
 {
 }
 
+//CAboutDlg消息映射
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 }
 
+//CAboutDlg 消息处理程序
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
 
-// CMazeGameDlg 对话框
 
+
+// CMazeGameDlg 消息映射
 void CMazeGameDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 }
 
-BEGIN_MESSAGE_MAP(CMazeGameDlg, CDialogEx)
-	ON_WM_SYSCOMMAND()
-	ON_WM_PAINT()
-	ON_WM_QUERYDRAGICON()
-	ON_WM_TIMER()
-END_MESSAGE_MAP()
-
-
 // CMazeGameDlg 消息处理程序
+BEGIN_MESSAGE_MAP(CMazeGameDlg, CDialogEx)
+	ON_WM_KEYDOWN()
+	ON_WM_PAINT()
+	ON_WM_TIMER()
+	ON_WM_SYSCOMMAND()
+	ON_WM_QUERYDRAGICON()
+END_MESSAGE_MAP()
 
 BOOL CMazeGameDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	// 将“关于...”菜单项添加到系统菜单中。
-
 	// IDM_ABOUTBOX 必须在系统命令范围内。
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
 
+	//获取系统菜单
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
 	if (pSysMenu != nullptr)
 	{
 		BOOL bNameValid;
 		CString strAboutMenu;
+		// 从资源中加载“关于...”菜单项的字符串
 		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
 		ASSERT(bNameValid);
 		if (!strAboutMenu.IsEmpty())
 		{
+			// 在系统菜单中添加分隔符和“关于...”菜单项
 			pSysMenu->AppendMenu(MF_SEPARATOR);
 			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
 		}
 	}
 
-	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
-	//  执行此操作
+	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-	// 
-	// 确保窗口句柄已经初始化后再调用 Invalidate()
-	Invalidate();
 
 	// 初始化计时器
 	m_nSecondsElapsed = 0;
 	SetTimer(1, 1000, nullptr); // 每秒触发一次
 
-	// 初始化标记
+	// 初始化迷宫绘制标记
 	m_bNeedUpdateWalls = true;
 
+	// 获取客户端区域的大小
 	CRect clientRect;
 	GetClientRect(&clientRect);
+
+	// 创建一个设备上下文（DC）对象
 	CClientDC dc(this);
+	// 创建一个兼容的内存设备上下文（DC）
 	m_memDC.CreateCompatibleDC(&dc);
+	// 创建一个兼容的位图，并将其选择到内存设备上下文中
 	m_memBitmap.CreateCompatibleBitmap(&dc, clientRect.Width(), clientRect.Height());
 	m_memDC.SelectObject(&m_memBitmap);
-
+	// 初始化玩家的前一个位置
 	m_prevPlayerPos = m_playerPos;
+	// 确保窗口句柄已经初始化后再调用 Invalidate()
+	Invalidate();
+
+	// 设置对话框的焦点
+	SetFocus();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
+//处理系统命令消息
 void CMazeGameDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
@@ -109,18 +119,19 @@ void CMazeGameDlg::OnSysCommand(UINT nID, LPARAM lParam)
 	}
 }
 
-//当用户拖动最小化窗口时系统调用此函数取得光标
-//显示。
+//当用户拖动最小化窗口时系统调用此函数取得光标显示
 HCURSOR CMazeGameDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+// CMazeGameDlg 类的构造函数
 CMazeGameDlg::CMazeGameDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_MAZEGAME_DIALOG, pParent), m_pMaze(nullptr), m_mazeSize(32), m_bTimerRunning(false), m_nSecondsElapsed(0), m_hIcon(nullptr)
 {
 }
 
+//初始化迷宫
 void CMazeGameDlg::InitializeMaze(int size)
 {
 	m_mazeSize = size;
@@ -132,7 +143,7 @@ void CMazeGameDlg::InitializeMaze(int size)
 	m_playerPos = m_pMaze->getStart();
 	m_nSecondsElapsed = 0;
 	m_bTimerRunning = true;
-	SetTimer(1, 1000, nullptr); // 启动计时器
+	SetTimer(1, 1000, nullptr);
 }
 
 void CMazeGameDlg::OnPaint()
@@ -146,8 +157,12 @@ void CMazeGameDlg::OnPaint()
 	GetClientRect(&clientRect);
 	int cellSize = min(clientRect.Width() / m_mazeSize, clientRect.Height() / m_mazeSize);
 
+	//迷宫绘制
+		//清空背景
 	if (m_bNeedUpdateWalls) {
-		m_memDC.FillSolidRect(&clientRect, RGB(255, 255, 255)); // 清空背景
+		m_memDC.FillSolidRect(&clientRect, RGB(255, 255, 255)); 
+		
+		// 绘制迷宫墙壁和路径颜色
 		for (int y = 0; y < m_mazeSize; ++y) {
 			for (int x = 0; x < m_mazeSize; ++x) {
 				CRect cellRect(x * cellSize, y * cellSize, (x + 1) * cellSize, (y + 1) * cellSize);
@@ -271,21 +286,66 @@ void CMazeGameDlg::updateWall()
 
 void CMazeGameDlg::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	switch (nChar) {
-	case VK_UP:    MovePossible(0, -1); break;
-	case VK_DOWN:  MovePossible(0, 1);  break;
-	case VK_LEFT:  MovePossible(-1, 0); break;
-	case VK_RIGHT: MovePossible(1, 0);  break;
+	switch (nChar)
+	{
+	case VK_UP:
+		MovePossible(0, -1);
+		break;
+	case VK_DOWN:
+		MovePossible(0, 1);
+		break;
+	case VK_LEFT:
+		MovePossible(-1, 0);
+		break;
+	case VK_RIGHT:
+		MovePossible(1, 0);
+		break;
+	default:
+		CDialogEx::OnKeyDown(nChar, nRepCnt, nFlags);
+		break;
 	}
-	CDialogEx::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
+void CMazeGameDlg::CalculateCellSizeAndTimerRect()
+{
+	CRect clientRect;
+	GetClientRect(&clientRect);
+	this->cellSize = min(clientRect.Width() / m_mazeSize, clientRect.Height() / m_mazeSize);
+
+	// 计算计时器区域的位置
+	CString strTime;
+	strTime.Format(_T("%02d:%02d"), this->m_nSecondsElapsed / 60, this->m_nSecondsElapsed % 60);
+	CSize textSize = m_memDC.GetTextExtent(strTime);
+	this->timerX = this->hintX;
+	this->timerY = 4 * this->cellSize;
+	if (m_mazeSize == 64) {
+		this->timerY += 6 * this->cellSize;
+	}
+	this->timerRect = CRect(this->timerX, this->timerY, this->timerX + textSize.cx, this->timerY + textSize.cy);
+}
+
+//玩家移动函数
 void CMazeGameDlg::MovePossible(int dx, int dy)
 {
 	int newX = m_playerPos.first + dx;
 	int newY = m_playerPos.second + dy;
 	if (!m_pMaze->isWall(newX, newY)) {
+		// 保存前一个位置
+		m_prevPlayerPos = m_playerPos;
+		// 更新玩家位置
 		m_playerPos = { newX, newY };
+
+		// 擦除前一个地块并在下一个地块绘制玩家
+		CRect prevPlayerRect(m_prevPlayerPos.first * cellSize, m_prevPlayerPos.second * cellSize, (m_prevPlayerPos.first + 1) * cellSize, (m_prevPlayerPos.second + 1) * cellSize);
+		CRect playerRect(m_playerPos.first * cellSize, m_playerPos.second * cellSize, (m_playerPos.first + 1) * cellSize, (m_playerPos.second + 1) * cellSize);
+
+		// 擦除前一个地块
+		m_memDC.FillSolidRect(prevPlayerRect, RGB(255, 255, 255)); // 白色路径
+
+		// 绘制玩家在新位置
+		m_memDC.FillSolidRect(playerRect, RGB(0, 0, 255)); // 蓝色玩家
+
+		// 重绘整个窗口
 		Invalidate();
 
 		// 起点重置计时器
@@ -294,13 +354,14 @@ void CMazeGameDlg::MovePossible(int dx, int dy)
 			m_bTimerRunning = true;
 			SetTimer(1, 1000, nullptr); // 启动计时器
 		}
-		//终点停止计时器
+		// 终点停止计时器
 		if (m_playerPos == m_pMaze->getEnd()) {
 			m_bTimerRunning = false;
 			KillTimer(1); // 停止计时器
 		}
 	}
 }
+
 
 BOOL CMazeGameDlg::PreTranslateMessage(MSG* pMsg)
 {
@@ -311,11 +372,20 @@ BOOL CMazeGameDlg::PreTranslateMessage(MSG* pMsg)
 	}
 	return CDialogEx::PreTranslateMessage(pMsg);
 }
+
 void CMazeGameDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	if (nIDEvent == 1 && m_bTimerRunning) {
 		m_nSecondsElapsed++;
-		Invalidate(); // 触发重绘
+		// 只重绘计时器区域
+		CString strTime;
+		strTime.Format(_T("%02d:%02d"), m_nSecondsElapsed / 60, m_nSecondsElapsed % 60);
+		CSize textSize = m_memDC.GetTextExtent(strTime);
+		CRect timerRect(hintX, timerY, hintX + textSize.cx, timerY + textSize.cy);
+		InvalidateRect(timerRect, FALSE);
+
+		// 重绘整个窗口
+		Invalidate();
 	}
 	CDialogEx::OnTimer(nIDEvent);
 }
