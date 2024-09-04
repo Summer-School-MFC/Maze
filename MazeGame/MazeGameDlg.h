@@ -44,7 +44,8 @@ protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnPaint();
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent); // 添加计时器消息处理函数
+	afx_msg void OnPauseButtonClicked(); // 添加暂停按钮点击处理函数
 	HICON m_hIcon;
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg HCURSOR OnQueryDragIcon();
@@ -66,4 +67,6 @@ private:
 	int timerY;
 	CRect timerRect;
 	int hintX;
+	CButton m_pauseButton; // 添加按钮控件
 };
+
