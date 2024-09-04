@@ -270,6 +270,7 @@
     <ClInclude Include="CFailure.h" />
     <ClInclude Include="Cwlc.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Maze.h" />
     <ClInclude Include="MazeGame.h" />
     <ClInclude Include="MazeGameDlg.h" />
     <ClInclude Include="pch.h" />
@@ -280,6 +281,7 @@
     <ClCompile Include="CEndGame.cpp" />
     <ClCompile Include="CFailure.cpp" />
     <ClCompile Include="Cwlc.cpp" />
+    <ClCompile Include="Maze.cpp" />
     <ClCompile Include="MazeGame.cpp" />
     <ClCompile Include="MazeGameDlg.cpp" />
     <ClCompile Include="pch.cpp">

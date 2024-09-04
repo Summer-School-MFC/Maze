@@ -26,16 +26,17 @@ protected:
 // CMazeGameDlg 对话框
 class CMazeGameDlg : public CDialogEx
 {
-	// 构造
-public:
-	CMazeGameDlg(CWnd* pParent = nullptr);	// 标准构造函数
-	void InitializeMaze(int size);
-	int GetElapsedTime() const;
-	void updateWall();
 	// 对话框数据
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_MAZEGAME_DIALOG };
 #endif
+
+public:
+	CMazeGameDlg(CWnd* pParent = nullptr);
+	void InitializeMaze(int size);
+	int GetElapsedTime() const;
+	void updateWall();
+	void CalculateCellSizeAndTimerRect();
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
@@ -61,6 +62,11 @@ private:
 	CDC m_memDC;
 	CBitmap m_memBitmap;
 	std::pair<int, int> m_prevPlayerPos;
+	int cellSize;
+	int timerX;
+	int timerY;
+	CRect timerRect;
+	int hintX;
 	CButton m_pauseButton; // 添加按钮控件
 };
 
