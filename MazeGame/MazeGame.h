@@ -13,6 +13,7 @@
 #include <random>
 #include <chrono>
 #include "sqlite3.h"
+#include <atlimage.h>
 
 
 // CMazeGameApp:
@@ -27,6 +28,9 @@ public:
     std::pair<int, int> getStart() const;
     std::pair<int, int> getEnd() const;
     std::vector<std::vector<int>> GetMazeData() const;
+    HBITMAP generateBitmap(const Maze* maze) const;
+    int getWidth() const { return width; }
+    int getHeight() const { return height; }
 
 private:
     void generateStartAndEnd();

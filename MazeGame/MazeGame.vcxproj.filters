@@ -90,5 +90,11 @@
     <Image Include="res\MazeGame.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="..\..\DS\Wall32Bit.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\..\W\wilson_front_01.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

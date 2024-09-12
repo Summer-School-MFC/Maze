@@ -4,6 +4,7 @@
 #pragma once
 #include "MazeGame.h"
 #include <chrono>
+#include <atlimage.h>
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
@@ -32,6 +33,7 @@ public:
     CMazeGameDlg(CWnd* pParent = nullptr);    // 标准构造函数
     void InitializeMaze(int size);
     void updateWall();
+    Maze* m_pMaze;
     // 对话框数据
 #ifdef AFX_DESIGN_TIME
     enum { IDD = IDD_MAZEGAME_DIALOG };
@@ -44,6 +46,7 @@ protected:
     afx_msg void OnPaint();
     afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
     HICON m_hIcon;
+    HBITMAP m_hBitmap;
     afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
     afx_msg HCURSOR OnQueryDragIcon();
     afx_msg void OnTimer(UINT_PTR nIDEvent); // 添加计时器消息处理函数
@@ -51,17 +54,15 @@ protected:
     DECLARE_MESSAGE_MAP()
 
 private:
-    Maze* m_pMaze;
     int m_mazeSize;
     std::pair<int, int> m_playerPos;
+    std::pair<int, int> m_prevPlayerPos;
     bool m_bNeedUpdateWalls;
     void MovePossible(int dx, int dy);
     CDC m_memDC;
     CBitmap m_memBitmap;
-    std::pair<int, int> m_prevPlayerPos;
     bool m_isGameEnded;
-    // 添加一个数组来保存每次游戏 GetTime 返回的值
-    std::vector<int> m_timeRecords;
+    std::vector<CString> m_timeRecords;
 
 
     // 计时器相关成员变量
@@ -76,21 +77,26 @@ private:
     CFont m_alertFont; // 警告字体
     void SetTimerAlert(bool alert); // 设置计时器警告状态
     int GetTime() const;
+    CString strTime;
 
     //暂停游戏相关成员变量
     bool m_isPaused; // 游戏是否暂停
     void PauseGame();
     void ResumeGame();
-    CButton m_pauseButton; // 暂停按钮
-    CStatic m_showPauseStatic; // 显示暂停状态的静态文本框
-    CTime m_pauseTime; // 记录暂停时的时间
-    CTimeSpan m_totalPausedTime; // 记录总的暂停时间
 
 	// 回放相关成员变量
 	std::vector<std::vector<int>> m_mazeData; // 存储迷宫数据
     std::vector<std::pair<int, int>> m_playerPath; // 存储玩家路径
 
 public:
+    CString GestringTime();
+    int GetintTime();
+    //暂停游戏相关成员变量
+    CButton m_pauseButton; // 暂停按钮
+    CStatic m_showPauseStatic; // 显示暂停状态的静态文本框
+    CTime m_pauseTime; // 记录暂停时的时间
+    CTimeSpan m_totalPausedTime; // 记录总的暂停时间
+
     afx_msg void OnBnClickedPauseButton();
     void SaveTimeRecordsToFile();
     void UpdateExitTime();
@@ -103,5 +109,6 @@ public:
     std::vector<std::pair<int, int>> GetPlayerPath() const;
     std::pair<int, int> GetMazeStartPos() const { return m_pMaze->getStart(); }
     std::pair<int, int> GetMazeEndPos() const { return m_pMaze->getEnd(); }
+    /*afx_msg void OnStnClickedPassrequireStatic();*/
 };
 extern CMazeGameDlg* pMazeGameDlg;

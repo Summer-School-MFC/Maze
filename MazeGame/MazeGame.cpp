@@ -120,6 +120,56 @@ Maze::Maze(int width, int height) : width(width), height(height) {
 	rng.seed(seed);
 }
 
+HBITMAP Maze::generateBitmap(const Maze* maze) const {
+	const int cellSize = 30; // 每个单元格的像素大小
+	const int bmpWidth = maze->getWidth() * cellSize;
+	const int bmpHeight = maze->getHeight() * cellSize;
+
+	HDC hdc = GetDC(NULL);
+	HDC memDC = CreateCompatibleDC(hdc);
+	HBITMAP hBitmap = CreateCompatibleBitmap(hdc, bmpWidth, bmpHeight);
+	SelectObject(memDC, hBitmap);
+
+	// 从资源中加载砖块纹理
+	HBITMAP hBrickBitmap = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP1));
+	HDC brickDC = CreateCompatibleDC(hdc);
+	SelectObject(brickDC, hBrickBitmap);
+
+	// 获取砖块纹理的宽度和高度
+	BITMAP brickBitmap;
+	GetObject(hBrickBitmap, sizeof(BITMAP), &brickBitmap);
+	int brickWidth = brickBitmap.bmWidth;
+	int brickHeight = brickBitmap.bmHeight;
+
+	// 绘制背景为统一颜色
+	HBRUSH hBrush = CreateSolidBrush(RGB(0x33, 0xA6, 0x33));
+	RECT rect = { 0, 0, bmpWidth, bmpHeight };
+	FillRect(memDC, &rect, hBrush);
+	DeleteObject(hBrush);
+
+	// 设置插值模式为 HALFTONE
+	SetStretchBltMode(memDC, HALFTONE);
+
+	// 绘制迷宫
+	for (int y = 0; y < maze->getHeight(); ++y) {
+		for (int x = 0; x < maze->getWidth(); ++x) {
+			if (isWall(x, y)) {
+				// 使用 StretchBlt 绘制缩放后的砖块纹理
+				StretchBlt(memDC, x * cellSize, y * cellSize, cellSize, cellSize, brickDC, 0, 0, brickWidth, brickHeight, SRCCOPY);
+			}
+			// 通路为透明，显示背景颜色
+		}
+	}
+
+	// 释放资源
+	DeleteDC(brickDC);
+	DeleteObject(hBrickBitmap);
+	DeleteDC(memDC);
+	ReleaseDC(NULL, hdc);
+
+	return hBitmap;
+}
+
 void Maze::generate() {
 	// 初始化迷宫，所有格子都是墙
 	grid.resize(height, std::vector<bool>(width, true));

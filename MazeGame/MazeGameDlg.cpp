@@ -11,11 +11,14 @@
 #include"CEndGame.h"
 #include<fstream>
 #include <iostream>
+#include <atlimage.h>
+#include <vector>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #define FILENAME "TimeRecords.txt"
 #endif
+
 using namespace std;
 
 CMazeGameDlg* pMazeGameDlg = nullptr;
@@ -53,6 +56,7 @@ BEGIN_MESSAGE_MAP(CMazeGameDlg, CDialogEx)
     ON_WM_TIMER() // 添加计时器消息映射
     ON_WM_CTLCOLOR() // 添加控件颜色消息映射
     ON_BN_CLICKED(IDC_PAUSE_BUTTON, &CMazeGameDlg::OnBnClickedPauseButton)
+    /*ON_STN_CLICKED(IDC_PASSREQUIRE_STATIC, &CMazeGameDlg::OnStnClickedPassrequireStatic)*/
 END_MESSAGE_MAP()
 
 
@@ -89,7 +93,7 @@ BOOL CMazeGameDlg::OnInitDialog()
     SetIcon(m_hIcon, FALSE);        // 设置小图标
 
     // TODO: 在此添加额外的初始化代码
-    // 
+
     // 确保窗口句柄已经初始化后再调用 Invalidate()
     Invalidate();
 
@@ -142,14 +146,14 @@ HCURSOR CMazeGameDlg::OnQueryDragIcon()
 }
 
 CMazeGameDlg::CMazeGameDlg(CWnd* pParent /*=nullptr*/)
-    : CDialogEx(IDD_MAZEGAME_DIALOG, pParent), m_pMaze(nullptr), m_mazeSize(32), m_hIcon(nullptr),
+    : CDialogEx(IDD_MAZEGAME_DIALOG, pParent), m_pMaze(new Maze(32, 32)), m_mazeSize(30), m_hIcon(nullptr),
     m_bNeedUpdateWalls(true), m_isPaused(false), m_isTimerAlert(false), m_isGameEnded(false),
     m_mazeData(32, std::vector<int>(32, 0)) 
 {
     pMazeGameDlg = this;
+    m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+    m_hBitmap = m_pMaze->generateBitmap(m_pMaze);
 }
-
-
 
 void CMazeGameDlg::InitializeMaze(int size)
 {
@@ -207,6 +211,58 @@ void CMazeGameDlg::OnPaint()
     CRect endRect(end.first * cellSize, end.second * cellSize, (end.first + 1) * cellSize, (end.second + 1) * cellSize);
     dc.FillSolidRect(endRect, RGB(255, 0, 0)); // 红色终点
 }
+
+//void CMazeGameDlg::OnPaint()
+//{
+//    CPaintDC dc(this); // 用于绘制的设备上下文
+//
+//    if (m_hBitmap != nullptr)
+//    {
+//        // 获取对话框的大小
+//        CRect rect;
+//        GetClientRect(&rect);
+//
+//        // 获取位图的宽度和高度
+//        BITMAP bitmap;
+//        GetObject(m_hBitmap, sizeof(BITMAP), &bitmap);
+//        int bitmapWidth = bitmap.bmWidth;
+//        int bitmapHeight = bitmap.bmHeight;
+//        const int cellSize = 30;
+//
+//        // 计算绘制区域
+//        CRect drawRect(0, 0, bitmapWidth, bitmapHeight);
+//
+//        // 创建内存设备上下文
+//        HDC hdcMem = CreateCompatibleDC(dc);
+//        HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, m_hBitmap);
+//
+//        // 使用 BitBlt 绘制图片，保持原始大小
+//        BitBlt(dc.m_hDC, drawRect.left, drawRect.top, bitmapWidth, bitmapHeight,
+//            hdcMem, 0, 0, SRCCOPY);
+//
+//        // 绘制玩家
+//        CRect playerRect(m_playerPos.first * cellSize, m_playerPos.second * cellSize, (m_playerPos.first + 1) * cellSize, (m_playerPos.second + 1) * cellSize);
+//        dc.FillSolidRect(playerRect, RGB(0, 0, 255)); // 蓝色玩家
+//
+//        auto start = m_pMaze->getStart();
+//        CRect startRect(start.first * cellSize, start.second * cellSize, (start.first + 1) * cellSize, (start.second + 1) * cellSize);
+//        dc.FillSolidRect(startRect, RGB(0, 255, 0)); // 绿色起点
+//
+//        auto end = m_pMaze->getEnd();
+//        CRect endRect(end.first * cellSize, end.second * cellSize, (end.first + 1) * cellSize, (end.second + 1) * cellSize);
+//        dc.FillSolidRect(endRect, RGB(255, 0, 0)); // 红色终点
+//
+//            // 清理
+//        SelectObject(hdcMem, hbmOld);
+//        DeleteDC(hdcMem);
+//    }
+//    else
+//    {
+//        // 输出调试信息
+//        TRACE("m_hBitmap is NULL in OnPaint\n");
+//        CDialogEx::OnPaint();
+//    }
+//}
 
 // 在updateWall函数中更新内存设备上下文
 void CMazeGameDlg::updateWall()
@@ -301,17 +357,8 @@ void CMazeGameDlg::EndGame()
 {
     KillTimer(1);
     m_isGameEnded = true;
-    CTimeSpan elapsed = m_currentTime - m_startTime;
-    const_cast<CMazeGameDlg*>(this)->m_timeRecords.push_back(static_cast<int>(elapsed.GetTotalSeconds()));
-    SaveTimeRecordsToFile();
-    UpdateExitTime();
-
-    // 保存玩家路径到文件
-    std::ofstream file("PlayerPath.txt");
-    for (const auto& pos : m_playerPath)
-    {
-        file << pos.first << " " << pos.second << std::endl;
-    }
+    SaveTimeRecordsToFile(); // 保存时间记录到文件
+    //UpdateExitTime();
 
     CEndGame endGameDlg;
     endGameDlg.DoModal();
@@ -417,19 +464,39 @@ int CMazeGameDlg::GetTime() const
     return static_cast<int>(elapsed);
 }
 
+CString CMazeGameDlg::GestringTime()
+{
+    elapsed = CTime::GetCurrentTime() - m_startTime - m_totalPausedTime;
+    strTime = elapsed.Format("%H:%M:%S");
+    return strTime;
+}
+
+int CMazeGameDlg::GetintTime()
+{
+    elapsed = CTime::GetCurrentTime() - m_startTime - m_totalPausedTime;
+    int seconds = static_cast<int>(elapsed.GetTotalSeconds());
+    /*const_cast<CMazeGameDlg*>(this)->m_timeRecords.push_back(elapsed);*/
+    return seconds;
+}
 
 void CMazeGameDlg::SaveTimeRecordsToFile()
 {
-    std::sort(m_timeRecords.begin(), m_timeRecords.end(), std::greater<int>());
-    std::ofstream ofs(FILENAME, std::ios::out);
+    GestringTime();
+    m_timeRecords.push_back(GestringTime());
+    /* std::sort(m_timeRecords.begin(), m_timeRecords.end(), std::greater<int>());*/
+    ofstream ofs;
+    ofs.open(FILENAME, ios::app);
     if (!ofs.is_open()) {
         AfxMessageBox(_T("无法打开文件进行写入"));
         return;
     }
-    for (int time : m_timeRecords) {
-        ofs << time << std::endl;
+    else
+    {
+        for (CString time : m_timeRecords) {
+            ofs << time << std::endl;
+        }
+        ofs.close();
     }
-    ofs.close();
 }
 
 void CMazeGameDlg::UpdateExitTime()
@@ -521,4 +588,14 @@ void CMazeGameDlg::OnGameStart()
     std::string movePath = "Move path data"; // 这里替换为实际的移动路径数据
 
     SaveGameRecord(startTimeStr, mazeMap, movePath);
+}
+
+void CEndGame::OnBnClickedPlaybackButton()
+{
+    CImagingDlg imagingDlg;
+    // 假设 pMazeGameDlg 是一个指向 MazeGameDlg 实例的指针
+    extern CMazeGameDlg* pMazeGameDlg;
+    imagingDlg.LoadMazeData(pMazeGameDlg->GetMazeData()); // 获取并加载迷宫数据
+    imagingDlg.m_playerPath = pMazeGameDlg->GetPlayerPath(); // 获取玩家路径
+    imagingDlg.DoModal(); // 弹出 IDD_IMAGING 窗口
 }

@@ -172,12 +172,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>D:\sqlite\sqlite-amalgamation-3460100;D：\sqlite</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\sqlite\sqlite-amalgamation-3460100;C:\sqlite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>D:\sqlite</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sqlite3.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\sqlite;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -189,6 +189,9 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -306,6 +309,8 @@
     <None Include="res\MazeGame.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\DS\Wall32Bit.bmp" />
+    <Image Include="..\..\W\wilson_front_01.bmp" />
     <Image Include="res\MazeGame.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

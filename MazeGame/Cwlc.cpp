@@ -45,7 +45,7 @@ END_MESSAGE_MAP()
 void Cwlc::OnBnClickedSelect32()
 {
     CMazeGameDlg dlg;
-    dlg.InitializeMaze(32);
+    dlg.InitializeMaze(30);
     this->ShowWindow(SW_HIDE);  // 隐藏欢迎对话框
     dlg.DoModal();
     this->ShowWindow(SW_SHOW); 
