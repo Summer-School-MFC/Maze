@@ -120,10 +120,10 @@ Maze::Maze(int width, int height) : width(width), height(height) {
 	rng.seed(seed);
 }
 
-HBITMAP Maze::generateBitmap(const Maze* maze) const {
+HBITMAP Maze::generateBitmap() const {
 	const int cellSize = 30; // 每个单元格的像素大小
-	const int bmpWidth = maze->getWidth() * cellSize;
-	const int bmpHeight = maze->getHeight() * cellSize;
+	const int bmpWidth = width * cellSize;
+	const int bmpHeight = height * cellSize;
 
 	HDC hdc = GetDC(NULL);
 	HDC memDC = CreateCompatibleDC(hdc);
@@ -150,9 +150,11 @@ HBITMAP Maze::generateBitmap(const Maze* maze) const {
 	// 设置插值模式为 HALFTONE
 	SetStretchBltMode(memDC, HALFTONE);
 
+	GetMazeData();
+
 	// 绘制迷宫
-	for (int y = 0; y < maze->getHeight(); ++y) {
-		for (int x = 0; x < maze->getWidth(); ++x) {
+	for (int y = 0; y < height; ++y) {
+		for (int x = 0; x < width; ++x) {
 			if (isWall(x, y)) {
 				// 使用 StretchBlt 绘制缩放后的砖块纹理
 				StretchBlt(memDC, x * cellSize, y * cellSize, cellSize, cellSize, brickDC, 0, 0, brickWidth, brickHeight, SRCCOPY);
@@ -231,14 +233,14 @@ void Maze::dfs(int x, int y) {
 	std::vector<std::pair<int, int>> shuffledDirections(directions.begin(), directions.end());
 	std::shuffle(shuffledDirections.begin(), shuffledDirections.end(), rng);
 
-	grid[y][x] = false;
+	grid[y][x] = FALSE;
 
 	for (const auto& dir : shuffledDirections) {
 		int nx = x + dir.first * 2;
 		int ny = y + dir.second * 2;
 
 		if (nx > 0 && nx < width - 1 && ny > 0 && ny < height - 1 && grid[ny][nx]) {
-			grid[y + dir.second][x + dir.first] = false;
+			grid[y + dir.second][x + dir.first] = FALSE;
 			dfs(nx, ny);
 		}
 	}

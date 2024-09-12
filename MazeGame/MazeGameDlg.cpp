@@ -152,7 +152,6 @@ CMazeGameDlg::CMazeGameDlg(CWnd* pParent /*=nullptr*/)
 {
     pMazeGameDlg = this;
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-    m_hBitmap = m_pMaze->generateBitmap(m_pMaze);
 }
 
 void CMazeGameDlg::InitializeMaze(int size)
@@ -163,106 +162,119 @@ void CMazeGameDlg::InitializeMaze(int size)
     }
     m_pMaze = new Maze(m_mazeSize, m_mazeSize);
     m_pMaze->generate();
+    m_hBitmap = m_pMaze->generateBitmap();
     m_playerPos = m_pMaze->getStart();
-}
-
-void CMazeGameDlg::OnPaint()
-{
-    CPaintDC dc(this);
-    if (!m_pMaze) {
-        TRACE("m_pMaze is null in OnPaint\n");
-        return;
-    }
-    CRect clientRect;
-    GetClientRect(&clientRect);
-    int cellSize = min(clientRect.Width() / m_mazeSize, clientRect.Height() / m_mazeSize);
-
-    if (m_bNeedUpdateWalls) {
-        m_memDC.FillSolidRect(&clientRect, RGB(255, 255, 255)); // 清空背景
-        for (int y = 0; y < m_mazeSize; ++y) {
-            for (int x = 0; x < m_mazeSize; ++x) {
-                CRect cellRect(x * cellSize, y * cellSize, (x + 1) * cellSize, (y + 1) * cellSize);
-                if (m_pMaze->isWall(x, y)) {
-                    m_memDC.FillSolidRect(cellRect, RGB(0, 0, 0)); // 黑色墙壁
-                }
-                else {
-                    m_memDC.FillSolidRect(cellRect, RGB(255, 255, 255)); // 白色路径
-                }
-            }
-        }
-        m_bNeedUpdateWalls = false; // 重绘完墙体后设置为false
-    }
-
-    // 将内存设备上下文中的内容绘制到屏幕上
-    dc.BitBlt(0, 0, clientRect.Width(), clientRect.Height(), &m_memDC, 0, 0, SRCCOPY);
-
-    // 只重绘上一个位置和当前的位置
-    CRect prevPlayerRect(m_prevPlayerPos.first * cellSize, m_prevPlayerPos.second * cellSize, (m_prevPlayerPos.first + 1) * cellSize, (m_prevPlayerPos.second + 1) * cellSize);
-    dc.FillSolidRect(prevPlayerRect, RGB(255, 255, 255)); // 白色路径
-
-    CRect playerRect(m_playerPos.first * cellSize, m_playerPos.second * cellSize, (m_playerPos.first + 1) * cellSize, (m_playerPos.second + 1) * cellSize);
-    dc.FillSolidRect(playerRect, RGB(0, 0, 255)); // 蓝色玩家
-
-    auto start = m_pMaze->getStart();
-    CRect startRect(start.first * cellSize, start.second * cellSize, (start.first + 1) * cellSize, (start.second + 1) * cellSize);
-    dc.FillSolidRect(startRect, RGB(0, 255, 0)); // 绿色起点
-
-    auto end = m_pMaze->getEnd();
-    CRect endRect(end.first * cellSize, end.second * cellSize, (end.first + 1) * cellSize, (end.second + 1) * cellSize);
-    dc.FillSolidRect(endRect, RGB(255, 0, 0)); // 红色终点
 }
 
 //void CMazeGameDlg::OnPaint()
 //{
-//    CPaintDC dc(this); // 用于绘制的设备上下文
-//
-//    if (m_hBitmap != nullptr)
-//    {
-//        // 获取对话框的大小
-//        CRect rect;
-//        GetClientRect(&rect);
-//
-//        // 获取位图的宽度和高度
-//        BITMAP bitmap;
-//        GetObject(m_hBitmap, sizeof(BITMAP), &bitmap);
-//        int bitmapWidth = bitmap.bmWidth;
-//        int bitmapHeight = bitmap.bmHeight;
-//        const int cellSize = 30;
-//
-//        // 计算绘制区域
-//        CRect drawRect(0, 0, bitmapWidth, bitmapHeight);
-//
-//        // 创建内存设备上下文
-//        HDC hdcMem = CreateCompatibleDC(dc);
-//        HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, m_hBitmap);
-//
-//        // 使用 BitBlt 绘制图片，保持原始大小
-//        BitBlt(dc.m_hDC, drawRect.left, drawRect.top, bitmapWidth, bitmapHeight,
-//            hdcMem, 0, 0, SRCCOPY);
-//
-//        // 绘制玩家
-//        CRect playerRect(m_playerPos.first * cellSize, m_playerPos.second * cellSize, (m_playerPos.first + 1) * cellSize, (m_playerPos.second + 1) * cellSize);
-//        dc.FillSolidRect(playerRect, RGB(0, 0, 255)); // 蓝色玩家
-//
-//        auto start = m_pMaze->getStart();
-//        CRect startRect(start.first * cellSize, start.second * cellSize, (start.first + 1) * cellSize, (start.second + 1) * cellSize);
-//        dc.FillSolidRect(startRect, RGB(0, 255, 0)); // 绿色起点
-//
-//        auto end = m_pMaze->getEnd();
-//        CRect endRect(end.first * cellSize, end.second * cellSize, (end.first + 1) * cellSize, (end.second + 1) * cellSize);
-//        dc.FillSolidRect(endRect, RGB(255, 0, 0)); // 红色终点
-//
-//            // 清理
-//        SelectObject(hdcMem, hbmOld);
-//        DeleteDC(hdcMem);
+//    CPaintDC dc(this);
+//    if (!m_pMaze) {
+//        TRACE("m_pMaze is null in OnPaint\n");
+//        return;
 //    }
-//    else
-//    {
-//        // 输出调试信息
-//        TRACE("m_hBitmap is NULL in OnPaint\n");
-//        CDialogEx::OnPaint();
+//    CRect clientRect;
+//    GetClientRect(&clientRect);
+//    int cellSize = min(clientRect.Width() / m_mazeSize, clientRect.Height() / m_mazeSize);
+//
+//    if (m_bNeedUpdateWalls) {
+//        m_memDC.FillSolidRect(&clientRect, RGB(255, 255, 255)); // 清空背景
+//        for (int y = 0; y < m_mazeSize; ++y) {
+//            for (int x = 0; x < m_mazeSize; ++x) {
+//                CRect cellRect(x * cellSize, y * cellSize, (x + 1) * cellSize, (y + 1) * cellSize);
+//                if (m_pMaze->isWall(x, y)) {
+//                    m_memDC.FillSolidRect(cellRect, RGB(0, 0, 0)); // 黑色墙壁
+//                }
+//                else {
+//                    m_memDC.FillSolidRect(cellRect, RGB(255, 255, 255)); // 白色路径
+//                }
+//            }
+//        }
+//        m_bNeedUpdateWalls = false; // 重绘完墙体后设置为false
 //    }
+//
+//    // 将内存设备上下文中的内容绘制到屏幕上
+//    dc.BitBlt(0, 0, clientRect.Width(), clientRect.Height(), &m_memDC, 0, 0, SRCCOPY);
+//
+//    // 只重绘上一个位置和当前的位置
+//    CRect prevPlayerRect(m_prevPlayerPos.first * cellSize, m_prevPlayerPos.second * cellSize, (m_prevPlayerPos.first + 1) * cellSize, (m_prevPlayerPos.second + 1) * cellSize);
+//    dc.FillSolidRect(prevPlayerRect, RGB(255, 255, 255)); // 白色路径
+//
+//    CRect playerRect(m_playerPos.first * cellSize, m_playerPos.second * cellSize, (m_playerPos.first + 1) * cellSize, (m_playerPos.second + 1) * cellSize);
+//    dc.FillSolidRect(playerRect, RGB(0, 0, 255)); // 蓝色玩家
+//
+//    auto start = m_pMaze->getStart();
+//    CRect startRect(start.first * cellSize, start.second * cellSize, (start.first + 1) * cellSize, (start.second + 1) * cellSize);
+//    dc.FillSolidRect(startRect, RGB(0, 255, 0)); // 绿色起点
+//
+//    auto end = m_pMaze->getEnd();
+//    CRect endRect(end.first * cellSize, end.second * cellSize, (end.first + 1) * cellSize, (end.second + 1) * cellSize);
+//    dc.FillSolidRect(endRect, RGB(255, 0, 0)); // 红色终点
 //}
+
+void CMazeGameDlg::OnPaint()
+{
+    CPaintDC dc(this); // 用于绘制的设备上下文
+
+    if (m_hBitmap != nullptr)
+    {
+        // 获取对话框的大小
+        CRect rect;
+        GetClientRect(&rect);
+
+        // 获取位图的宽度和高度
+        BITMAP bitmap;
+        GetObject(m_hBitmap, sizeof(BITMAP), &bitmap);
+        int bitmapWidth = bitmap.bmWidth;
+        int bitmapHeight = bitmap.bmHeight;
+        const int cellSize = 30;
+
+        // 计算绘制区域
+        CRect drawRect(0, 0, bitmapWidth, bitmapHeight);
+
+        // 创建内存设备上下文
+        HDC hdcMem = CreateCompatibleDC(dc);
+        HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, m_hBitmap);
+
+        // 使用 BitBlt 绘制图片，保持原始大小
+        BitBlt(dc.m_hDC, drawRect.left, drawRect.top, bitmapWidth, bitmapHeight,
+            hdcMem, 0, 0, SRCCOPY);
+
+        // 绘制玩家
+        auto start = m_pMaze->getStart();
+        CRect startRect(start.first * cellSize, start.second * cellSize, (start.first + 1) * cellSize, (start.second + 1) * cellSize);
+        dc.FillSolidRect(startRect, RGB(0, 255, 0)); // 绿色起点
+
+        auto end = m_pMaze->getEnd();
+        CRect endRect(end.first * cellSize, end.second * cellSize, (end.first + 1) * cellSize, (end.second + 1) * cellSize);
+        dc.FillSolidRect(endRect, RGB(255, 0, 0)); // 红色终点
+        
+        HBITMAP hPlayerBitmap = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP2));
+        HDC playerDC = CreateCompatibleDC(dc);
+        SelectObject(playerDC, hPlayerBitmap);
+
+        BITMAP playerBitmap;
+        GetObject(hPlayerBitmap, sizeof(BITMAP), &playerBitmap);
+        int playerWidth = playerBitmap.bmWidth;
+        int playerHeight = playerBitmap.bmHeight;
+
+        CRect playerRect(m_playerPos.first * cellSize, m_playerPos.second * cellSize, (m_playerPos.first + 1) * cellSize, (m_playerPos.second + 1) * cellSize);
+        StretchBlt(dc.m_hDC, playerRect.left, playerRect.top, cellSize, cellSize, playerDC, 0, 0, playerWidth, playerHeight, SRCCOPY);
+
+        DeleteObject(hPlayerBitmap);
+        DeleteDC(playerDC);
+
+            // 清理
+        SelectObject(hdcMem, hbmOld);
+        DeleteDC(hdcMem);
+    }
+    else
+    {
+        // 输出调试信息
+        TRACE("m_hBitmap is NULL in OnPaint\n");
+        CDialogEx::OnPaint();
+    }
+}
 
 // 在updateWall函数中更新内存设备上下文
 void CMazeGameDlg::updateWall()
@@ -361,7 +373,10 @@ void CMazeGameDlg::EndGame()
     //UpdateExitTime();
 
     CEndGame endGameDlg;
+    this->ShowWindow(SW_HIDE);  // 隐藏对话框
     endGameDlg.DoModal();
+    this->ShowWindow(SW_SHOW);
+    EndDialog(IDOK);
 }
 
 HBRUSH CMazeGameDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)

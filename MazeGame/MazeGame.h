@@ -28,17 +28,17 @@ public:
     std::pair<int, int> getStart() const;
     std::pair<int, int> getEnd() const;
     std::vector<std::vector<int>> GetMazeData() const;
-    HBITMAP generateBitmap(const Maze* maze) const;
+    HBITMAP generateBitmap() const;
     int getWidth() const { return width; }
     int getHeight() const { return height; }
-
+    std::vector<std::vector<bool>> grid;
 private:
     void generateStartAndEnd();
     void dfs(int x, int y);
 
     int width;
     int height;
-    std::vector<std::vector<bool>> grid;
+
     std::pair<int, int> start;
     std::pair<int, int> end;
     std::mt19937 rng;

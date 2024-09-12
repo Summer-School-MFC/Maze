@@ -58,6 +58,8 @@ BOOL CEndGame::OnInitDialog()
 void CEndGame::OnBnClickedExitEnd()
 {
     EndDialog(IDOK); // 关闭对话框
+
+
 }
 
 void CEndGame::OnBnClickedHistory()
