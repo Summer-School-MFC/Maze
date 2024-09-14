@@ -96,5 +96,14 @@
     <Image Include="..\..\W\wilson_front_01.bmp">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="..\..\W\wilson_back_01.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\..\W\wilson_left_01.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\..\W\wilson_right_01.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

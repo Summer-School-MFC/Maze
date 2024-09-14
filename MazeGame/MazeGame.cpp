@@ -157,7 +157,8 @@ HBITMAP Maze::generateBitmap() const {
 		for (int x = 0; x < width; ++x) {
 			if (isWall(x, y)) {
 				// 使用 StretchBlt 绘制缩放后的砖块纹理
-				StretchBlt(memDC, x * cellSize, y * cellSize, cellSize, cellSize, brickDC, 0, 0, brickWidth, brickHeight, SRCCOPY);
+				StretchBlt(memDC, x * cellSize, y * cellSize, cellSize, cellSize, brickDC, 
+					0, 0, brickWidth, brickHeight, SRCCOPY);
 			}
 			// 通路为透明，显示背景颜色
 		}

@@ -248,8 +248,9 @@ void CMazeGameDlg::OnPaint()
         auto end = m_pMaze->getEnd();
         CRect endRect(end.first * cellSize, end.second * cellSize, (end.first + 1) * cellSize, (end.second + 1) * cellSize);
         dc.FillSolidRect(endRect, RGB(255, 0, 0)); // 红色终点
-        
+
         HBITMAP hPlayerBitmap = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_BITMAP2));
+
         HDC playerDC = CreateCompatibleDC(dc);
         SelectObject(playerDC, hPlayerBitmap);
 

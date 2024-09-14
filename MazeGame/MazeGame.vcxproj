@@ -310,7 +310,10 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\DS\Wall32Bit.bmp" />
+    <Image Include="..\..\W\wilson_back_01.bmp" />
     <Image Include="..\..\W\wilson_front_01.bmp" />
+    <Image Include="..\..\W\wilson_left_01.bmp" />
+    <Image Include="..\..\W\wilson_right_01.bmp" />
     <Image Include="res\MazeGame.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
